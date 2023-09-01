@@ -117,14 +117,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut body_arg: Option<&str> = None;
             if argmatches.contains_id("title") {
                 title_arg = argmatches.get_one::<String>("title").map(|s| s.as_str());
-
-                println!("title: {}", title_arg.unwrap());
             }
 
             if argmatches.contains_id("body") {
                 body_arg = argmatches.get_one::<String>("body").map(|s| s.as_str());
-
-                println!("body: {}", body_arg.unwrap());
             }
 
             let new_issue = Issue::create_new(&client, title_arg, body_arg).await?;
@@ -137,27 +133,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Successfully created new issue");
         }
 
-        _ => {
-            /* INFO:
-             *
-             * ArgMatches can be used if we want to have more than two
-             * command line arguments consecutively.
-             *
-             * ```
-             * if _argmatches.contains_id("needle") {
-             *  let needles_from_haystack = Vec<_> =
-             *                              _argmatches
-             *                                  .get_many::<String>("needle")
-             *                                  .expect("contains_id")
-             *                                  .map(|s| s.as_str())
-             *                                  .collect();
-             *
-             *  let needles = needles_from_haystack.join(", ");
-             * }
-             * ```
-             *
-             */
-        }
+        _ => {}
     }
 
     Ok(())
