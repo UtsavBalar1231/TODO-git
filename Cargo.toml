@@ -24,3 +24,6 @@ features = ["json"]
 [dependencies.clap]
 version = "4.4.1"
 features = ["derive"]
+
+[dependencies.spinoff]
+version = "0.8.0"
