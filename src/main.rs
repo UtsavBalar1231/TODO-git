@@ -66,7 +66,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let issue_number = issues.get(LATEST_ISSUE).expect("No issues found!");
 
             if let Some(body) = &issue_number.body {
-                println!("{body}");
+                // View body in `glow` pager if it is installed
+                if todo_git::find_command("glow").is_some() {
+                    sp.update(
+                        spinners::Dots2,
+                        "Successfully fetched latest issue",
+                        Color::Green,
+                    );
+                    const TMP_FILE: &str = "/tmp/todo-git.md";
+
+                    let mut tmp_todofile = std::fs::File::create(TMP_FILE)?;
+                    tmp_todofile.write_all(body.as_bytes())?;
+
+                    let status = std::process::Command::new("glow")
+                        .arg(TMP_FILE)
+                        .status()
+                        .expect("Error opening editor!");
+
+                    if !status.success() {
+                        sp.fail("Error in opening editor!");
+                        std::process::exit(1);
+                    }
+                } else {
+                    println!("{body}");
+                }
                 sp.success("Successfully printed the issue content");
             } else {
                 sp.success("Empty issue body");

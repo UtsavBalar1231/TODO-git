@@ -11,3 +11,23 @@ pub const LATEST_ISSUE: usize = 0;
 
 pub mod issue;
 pub mod todo_git;
+
+use std::{env, path};
+
+/// Checks if a executable command exists on the Filesystem.
+/// Return the full path of the executable if it exists.
+pub fn find_command<P>(executable: P) -> Option<path::PathBuf>
+where
+    P: AsRef<path::Path>,
+{
+    env::var_os("PATH").and_then(|paths| {
+        env::split_paths(&paths).find_map(|dir| {
+            let full_path = dir.join(&executable);
+            if full_path.is_file() {
+                Some(full_path)
+            } else {
+                None
+            }
+        })
+    })
+}
