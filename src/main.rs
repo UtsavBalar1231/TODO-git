@@ -131,19 +131,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             if argmatches.contains_id("interactive") {
                 sp.stop();
+                let mut owner = String::new();
+                let mut repo = String::new();
+                let mut token = String::new();
+
                 println!("Enter Github owner: ");
                 io::stdin()
-                    .read_line(&mut config.owner)
+                    .read_line(&mut owner)
                     .expect("Failed to read owner");
                 println!("Enter Github repository: ");
                 io::stdin()
-                    .read_line(&mut config.repo)
+                    .read_line(&mut repo)
                     .expect("Failed to read repo");
                 println!("Enter Owner's Github token:");
                 io::stdin()
-                    .read_line(&mut config.token)
+                    .read_line(&mut token)
                     .expect("Failed to read token");
                 println!();
+
+                // trim the whitespace from the input
+                config.owner = owner.trim().to_string();
+                config.repo = repo.trim().to_string();
+                config.token = token.trim().to_string();
             } else {
                 sp.success(&format!("Edit the {} file", config_path.display()));
             }
