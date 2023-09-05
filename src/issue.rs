@@ -11,14 +11,19 @@ use serde_json::json;
 #[derive(Deserialize, Serialize)]
 pub struct Issue {
     /// Handle to store the title of the issues.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     /// State of the issue
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<String>,
     /// Handle to store the number of the issue from the list of issues.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub number: Option<usize>,
     /// Handle to store the body content of the issue.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
     /// Handle to issue id.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub node_id: Option<String>,
 }
 
