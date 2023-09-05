@@ -25,8 +25,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "Successfully fetched latest issue",
                     Color::Green,
                 );
-                const TMP_FILE: &str = "/tmp/todo-git.md";
-                let mut tmp_todofile = std::fs::File::create(TMP_FILE)?;
+                let tmp_file: std::path::PathBuf = std::env::temp_dir().join("todo-git.md");
+                let mut tmp_todofile = std::fs::File::create(&tmp_file)?;
                 tmp_todofile.write_all(body.as_bytes())?;
 
                 let editor = option_env!("EDITOR").unwrap_or("vim");
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 sp.success(&format!("Opening issue body in {}", editor));
 
                 let status = std::process::Command::new(editor)
-                    .arg(TMP_FILE)
+                    .arg(&tmp_file)
                     .status()
                     .expect("Error opening editor!");
 
@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 let mut sp = Spinner::new(spinners::Dots2, "Updating issue body", Color::Yellow);
 
-                let mut tmp_todofile = std::fs::File::open(TMP_FILE)?;
+                let mut tmp_todofile = std::fs::File::open(tmp_file)?;
                 let mut body = String::new();
                 tmp_todofile.read_to_string(&mut body)?;
 
@@ -73,13 +73,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "Successfully fetched latest issue",
                         Color::Green,
                     );
-                    const TMP_FILE: &str = "/tmp/todo-git.md";
+                    let tmp_file: std::path::PathBuf = std::env::temp_dir().join("todo-git.md");
 
-                    let mut tmp_todofile = std::fs::File::create(TMP_FILE)?;
+                    let mut tmp_todofile = std::fs::File::create(&tmp_file)?;
                     tmp_todofile.write_all(body.as_bytes())?;
 
                     let status = std::process::Command::new("glow")
-                        .arg(TMP_FILE)
+                        .arg(&tmp_file)
                         .status()
                         .expect("Error opening editor!");
 
