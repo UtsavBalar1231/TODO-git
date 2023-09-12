@@ -31,8 +31,8 @@ impl Issue {
     /// Create a new issue, with optional title and body arguments
     pub async fn create_new(
         client: &reqwest::Client,
-        title: Option<&str>,
-        body: Option<&str>,
+        title: Option<String>,
+        body: Option<String>,
     ) -> std::result::Result<reqwest::Response, reqwest::Error> {
         let todo_git = TodoGit::parse(None).expect("Failed to parse todo_git config");
 
@@ -47,8 +47,8 @@ impl Issue {
             .header("Authorization", format!("Bearer {}", todo_git.token))
             .header(reqwest::header::USER_AGENT, USER_AGENT)
             .json(&json!({
-                "title": title.unwrap_or(""),
-                "body": body.unwrap_or(""),
+                "title": title.unwrap_or(String::new()),
+                "body": body.unwrap_or(String::new()),
             }))
             .send()
             .await

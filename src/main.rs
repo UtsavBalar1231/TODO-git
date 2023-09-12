@@ -2,6 +2,7 @@ use spinoff::{spinners, Color, Spinner};
 use std::io::{self, Read, Write};
 use todo_git::{issue::Issue, todo_git::TodoGit, LATEST_ISSUE};
 mod args;
+use args::TodoGitCommand;
 
 // TODO: Implement HTTP Response error handling
 // TODO: Implement Multi todo-list issues handling
@@ -9,10 +10,10 @@ mod args;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Clap method to parse command line arguments
-    let cli = args::cli();
+    let command = TodoGitCommand::parse();
 
-    match cli.subcommand() {
-        Some(("edit", _argmatches)) => {
+    match command {
+        Some(TodoGitCommand::Edit) => {
             let mut sp = Spinner::new(spinners::Dots2, "Fetching latest issue", Color::Yellow);
             let client = reqwest::Client::new();
             let issues = Issue::get_issues_list(&client).await?;
@@ -58,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 sp.success("Successfully updated issue body!");
             }
         }
-        Some(("view", _argmatches)) => {
+        Some(TodoGitCommand::View) => {
             let mut sp = Spinner::new(spinners::Dots2, "Fetching latest issue", Color::Yellow);
             let client = reqwest::Client::new();
             let issues = Issue::get_issues_list(&client).await?;
@@ -96,7 +97,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
-        Some(("delete", _argmatches)) => {
+        Some(TodoGitCommand::Delete) => {
             let mut sp = Spinner::new(spinners::Dots2, "Deleting latest issue", Color::Yellow);
             let client = reqwest::Client::new();
             let issues = Issue::get_issues_list(&client).await?;
@@ -115,7 +116,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ));
         }
 
-        Some(("create-config", argmatches)) => {
+        Some(TodoGitCommand::CreateConfig(interactive)) => {
             let mut sp = Spinner::new(spinners::Dots2, "Creating config file", Color::Yellow);
             let mut config = TodoGit::default();
             let todo_config = format!("{}/.{}.json", env!("HOME"), env!("CARGO_PKG_NAME"),);
@@ -129,7 +130,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 std::process::exit(1);
             }
 
-            if argmatches.contains_id("interactive") {
+            if interactive {
                 sp.stop();
                 let mut owner = String::new();
                 let mut repo = String::new();
@@ -165,21 +166,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             sp.success("Successfully created config file");
         }
 
-        Some(("new", argmatches)) => {
+        Some(TodoGitCommand::New { title, body }) => {
             let mut sp = Spinner::new(spinners::Dots2, "Creating new issue", Color::Yellow);
             let client = reqwest::Client::new();
 
-            let mut title_arg: Option<&str> = None;
-            let mut body_arg: Option<&str> = None;
-            if argmatches.contains_id("title") {
-                title_arg = argmatches.get_one::<String>("title").map(|s| s.as_str());
-            }
-
-            if argmatches.contains_id("body") {
-                body_arg = argmatches.get_one::<String>("body").map(|s| s.as_str());
-            }
-
-            let new_issue = Issue::create_new(&client, title_arg, body_arg).await?;
+            let new_issue = Issue::create_new(&client, title, body).await?;
 
             if !new_issue.status().is_success() {
                 sp.warn(&format!(
@@ -192,7 +183,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             sp.success("Successfully created new issue");
         }
 
-        _ => {}
+        Some(TodoGitCommand::Help) => {}
+
+        None => {
+            println!("Invalid command");
+        }
     }
 
     Ok(())
